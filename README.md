@@ -1,30 +1,31 @@
 # Sliding Cluster Puzzle / PortMaster
 
-Native C++/SDL2 handheld port of Sliding Cluster Puzzle, sharing the Plaits, Rings and Handpan synthesis engines with PocketTracker 3.
+Native C++/SDL2 version of Sliding Cluster Puzzle, using PocketTracker 3 R8's Plaits, Rings and Handpan DSP.
 
-## Status
+## Current development build: Match Clarity + PocketTracker font
 
-The **ARM64 build workflow is configured**, but no installable binary has been produced or verified yet. Source archive upload and an ARM64 build are still required.
+The complete game source and nine visual families are prepared, but **the ARM64 installer is not yet compiled or handheld-tested**.
 
-## Build the corrected edition
+The current fixes are:
 
-1. Upload **`SlidingCluster_PT3_AllThemes_FixedSource.zip`** to the root of this repository, unchanged.
-2. The [ARM64 workflow](.github/workflows/build-slidingcluster-pt3.yml) starts automatically when the upload is committed. It can also be launched using **Actions → Build Sliding Cluster All Themes (PortMaster ARM64) → Run workflow**.
-3. After a successful build, download the `SlidingCluster-PortMaster-ARM64-...` Actions artifact.
-4. Unzip the Actions artifact once. The inner `slidingcluster_pt3.zip` is the PortMaster installation archive.
-5. Copy `slidingcluster_pt3.zip` into your SD card's PortMaster autoinstall folder, or extract its contents beneath `roms/ports`.
+- Dominant full-tile match colours and a stable **1-8 match identity badge**
+- Small, clearly identified **B/P/S** special glyphs. Special blocks match by their underlying numbered colour
+- Actual **quinine_five** bitmap glyphs from PocketTracker 3 R8's native `ui/font5x5.h`
+- Correct shifter clear order: clear the original matching tiles **before** rotating the surrounding survivors
+- Fixed grey tiles and portals are protected from bomb blasts
+- All nine art themes, manual strips, edge-push spawn, wraparound and 40 curated modes retained
 
-## Current fixes
+## Build the current PortMaster installer
 
-- Nine theme atlases with correct 32×32 tile boundaries
-- Six theme families rebuilt with dedicated pixel artwork rather than unreliable poster crops; Neon Arcade likewise redrawn, Signal Terminal source art retained
-- Stronger colour-identity markers so same-colour matches are legible
-- Fixed grey blocks are visually distinguished from movable grey blocks
-- Manual row/column shifts and 3×3 shifter rotations refuse to move immovable blocks or portals
-- All 40 curated gameplay modes retained
+1. Get `SlidingCluster_PT3_MatchClarity_Source.zip` from the ChatGPT build kit.
+2. Upload that ZIP **unchanged** to the root of this repository using [Upload files](https://github.com/domu-code/slidingcluster-portmaster/upload/main).
+3. Committing the upload triggers the [ARM64 build workflow](.github/workflows/build-slidingcluster-pt3.yml). The workflow verifies the source SHA-256, builds in an ARM64 Ubuntu 20.04 container, runs game and audio tests, and packages the compiled executable.
+4. After a successful run, download the Actions artifact. The **inner** `slidingcluster_pt3.zip` is the PortMaster installable game archive.
 
-## Validation
+The GitHub workflow cannot build until the corrected source ZIP has been uploaded to the repository.
 
-Local C++ rules checks pass, including edge wraparound tests and fixed-block strip invariants. 40 curated preset checks pass. The SDL2 final compile and physical handheld tests have not been completed.
+## Testing
 
-The PocketTracker 3 repositories are unrelated to this release and are not modified.
+Local native rules tests, the 40-mode catalogue, and SDL2 UI syntax checks pass. Full Processing + Beads runtime validation, actual ARM64 compilation, and physical handheld tests are still pending.
+
+The PocketTracker repositories are independent and have not been modified.
