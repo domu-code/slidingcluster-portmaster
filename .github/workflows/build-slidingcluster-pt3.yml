@@ -1,0 +1,83 @@
+name: Build Sliding Cluster All Themes (PortMaster ARM64)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portmaster-aarch64:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - name: Fetch game source
+        uses: actions/checkout@v4
+
+      - name: Validate source archive and theme artwork
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f SlidingCluster_PT3_AllThemes_Source.zip || { echo "::error::Upload SlidingCluster_PT3_AllThemes_Source.zip to the repository root first."; exit 1; }
+          echo '048fbd0fc3fb116cfcbdd058d84359f014f8f62deba7f55cfadea2ea270eb764  SlidingCluster_PT3_AllThemes_Source.zip' | sha256sum -c -
+          unzip -q SlidingCluster_PT3_AllThemes_Source.zip
+          test -s SlidingCluster_PT3_AllThemes_Source/src/ui.cpp
+          test -s SlidingCluster_PT3_AllThemes_Source/pt_audio/vendor/mutable/plaits/dsp/voice.cc
+          test -s SlidingCluster_PT3_AllThemes_Source/pt_audio/vendor/mutable/rings/dsp/part.cc
+          for i in $(seq 0 8); do
+            test "$(find SlidingCluster_PT3_AllThemes_Source/shell/slidingcluster_pt3/assets -maxdepth 1 -name "theme_${i}_*_atlas.bmp" | wc -l)" -eq 1
+          done
+          mkdir -p logs
+
+      - name: Build and run tests on ARM64 using Ubuntu 20.04 compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --platform linux/arm64 \
+            -v "$PWD:/workspace" -w /workspace \
+            ubuntu:20.04 \
+            bash -euxo pipefail /workspace/SlidingCluster_PT3_AllThemes_Source/tools/build_on_arm64_focal.sh \
+            2>&1 | tee logs/build.log
+
+      - name: Verify PortMaster installer structure and machine type
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive=SlidingCluster_PT3_AllThemes_Source/release/slidingcluster_pt3.zip
+          test -s "$archive"
+          unzip -t "$archive" > logs/zip-test.log
+          python3 - <<'PY'
+          import zipfile
+          path = 'SlidingCluster_PT3_AllThemes_Source/release/slidingcluster_pt3.zip'
+          with zipfile.ZipFile(path) as z:
+              names = set(z.namelist())
+              for name in ('Sliding Cluster PT3.sh', 'port.json', 'slidingcluster_pt3/slidingcluster.aarch64'):
+                  assert name in names, 'Missing '+name
+              elf = z.read('slidingcluster_pt3/slidingcluster.aarch64')[:20]
+              assert elf[:4] == b'\x7fELF', 'Not an ELF binary'
+              assert int.from_bytes(elf[18:20], 'little') == 183, 'Not an AArch64 binary'
+              for i in range(9):
+                  matches = [f for f in names if f.startswith(f'slidingcluster_pt3/assets/theme_{i}_') and f.endswith('.bmp')]
+                  assert len(matches) == 1, f'Expected exactly one atlas for theme {i}'
+          print('AArch64 binary and nine themes verified')
+          PY
+
+      - name: Upload PortMaster installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: SlidingCluster-PortMaster-ARM64-${{ github.run_number }}
+          path: |
+            SlidingCluster_PT3_AllThemes_Source/release/slidingcluster_pt3.zip
+            SlidingCluster_PT3_AllThemes_Source/release/BUILD_INFO.json
+            SlidingCluster_PT3_AllThemes_Source/release/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SlidingCluster-Build-Logs-${{ github.run_number }}
+          path: logs/
+          if-no-files-found: warn
+          retention-days: 30
