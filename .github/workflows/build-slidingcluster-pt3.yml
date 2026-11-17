@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           test -f SlidingCluster_PT3_AllThemes_FixedSource.zip || { echo "::error::Upload SlidingCluster_PT3_AllThemes_FixedSource.zip to the repository root first."; exit 1; }
-          echo 'f1ef2d9fc346761d6e04d0c2d880f091a7999b110ae7dcfed463c5ed586da67b  SlidingCluster_PT3_AllThemes_FixedSource.zip' | sha256sum -c -
+          echo 'e52186fb11a47d6b7a302118d1c24f7a223559e6fad055305c1887d44f6e92ae  SlidingCluster_PT3_AllThemes_FixedSource.zip' | sha256sum -c -
           unzip -q SlidingCluster_PT3_AllThemes_FixedSource.zip
           test -s SlidingCluster_PT3_AllThemes_Source/src/ui.cpp
           test -s SlidingCluster_PT3_AllThemes_Source/pt_audio/vendor/mutable/plaits/dsp/voice.cc
