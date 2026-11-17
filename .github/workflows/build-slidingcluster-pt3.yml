@@ -18,9 +18,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f SlidingCluster_PT3_AllThemes_Source.zip || { echo "::error::Upload SlidingCluster_PT3_AllThemes_Source.zip to the repository root first."; exit 1; }
-          echo '048fbd0fc3fb116cfcbdd058d84359f014f8f62deba7f55cfadea2ea270eb764  SlidingCluster_PT3_AllThemes_Source.zip' | sha256sum -c -
-          unzip -q SlidingCluster_PT3_AllThemes_Source.zip
+          test -f SlidingCluster_PT3_AllThemes_FixedSource.zip || { echo "::error::Upload SlidingCluster_PT3_AllThemes_FixedSource.zip to the repository root first."; exit 1; }
+          echo 'f1ef2d9fc346761d6e04d0c2d880f091a7999b110ae7dcfed463c5ed586da67b  SlidingCluster_PT3_AllThemes_FixedSource.zip' | sha256sum -c -
+          unzip -q SlidingCluster_PT3_AllThemes_FixedSource.zip
           test -s SlidingCluster_PT3_AllThemes_Source/src/ui.cpp
           test -s SlidingCluster_PT3_AllThemes_Source/pt_audio/vendor/mutable/plaits/dsp/voice.cc
           test -s SlidingCluster_PT3_AllThemes_Source/pt_audio/vendor/mutable/rings/dsp/part.cc
